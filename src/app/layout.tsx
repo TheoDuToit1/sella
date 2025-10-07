@@ -15,11 +15,7 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Sella',
   },
-  icons: {
-    icon: '/website-images/favicon.png',
-    shortcut: '/website-images/favicon.png',
-    apple: '/icon-192x192.png',
-  },
+  icons: {`n    icon: '/website-images/favicon.png',`n    shortcut: '/website-images/favicon.png',`n    apple: '/icon-192x192.png',`n  },`n  openGraph: {`n    images: [{ url: '/website-images/sella-thumbnail.png' }],`n  },
 }
 
 export default function RootLayout({
@@ -48,3 +44,4 @@ export default function RootLayout({
     </html>
   )
 }
+
