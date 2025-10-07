@@ -27,14 +27,14 @@ export async function POST(request: NextRequest) {
 
     if (!validation.isValid) {
       console.error('Invalid PayFast notification:', validation.error)
-      return NextResponse.json({ error: 'Invalid notification' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid notification' }, { status: 400 } as any)
     }
 
     const { orderId, paymentStatus, amount } = validation
 
     if (!orderId) {
       console.error('No order ID in PayFast notification')
-      return NextResponse.json({ error: 'No order ID' }, { status: 400 })
+      return NextResponse.json({ error: 'No order ID' }, { status: 400 } as any)
     }
 
     // Handle delta payments (weight adjustments)
@@ -50,17 +50,17 @@ export async function POST(request: NextRequest) {
 
     if (orderError || !order) {
       console.error('Order not found:', actualOrderId)
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 } as any)
     }
 
     // Update payment status based on PayFast response
     let newPaymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' = 'PENDING'
-    let newOrderStatus = order.status
+    let newOrderStatus = (order as any).status
 
     switch (paymentStatus) {
       case PAYFAST_STATUS.COMPLETE:
         newPaymentStatus = 'PAID'
-        if (order.status === 'PLACED') {
+        if ((order as any).status === 'PLACED') {
           newOrderStatus = 'PREPARING'
         }
         break
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         provider_ref: data.pf_payment_id,
         captured_at: newPaymentStatus === 'PAID' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
-      })
+      } as any)
       .eq('order_id', actualOrderId)
       .eq('provider', 'PAYFAST')
 
@@ -95,12 +95,12 @@ export async function POST(request: NextRequest) {
         payment_status: newPaymentStatus,
         status: newOrderStatus,
         updated_at: new Date().toISOString(),
-      })
+      } as any)
       .eq('id', actualOrderId)
 
     if (orderUpdateError) {
       console.error('Failed to update order:', orderUpdateError)
-      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 } as any)
     }
 
     // Log the payment event
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
           is_delta_payment: isDeltaPayment,
           pf_payment_id: data.pf_payment_id,
         },
-      })
+      } as any)
 
     // If payment is successful and it's not a delta payment, create delivery record
     if (newPaymentStatus === 'PAID' && !isDeltaPayment) {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         .insert({
           order_id: actualOrderId,
           status: 'ASSIGNED',
-        })
+        } as any)
 
       if (deliveryError) {
         console.error('Failed to create delivery record:', deliveryError)
@@ -141,15 +141,21 @@ export async function POST(request: NextRequest) {
       console.log(`Order ${actualOrderId} payment confirmed - should send email`)
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true } as any)
 
   } catch (error) {
     console.error('PayFast notification processing error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 } as any)
   }
 }
 
 // PayFast sends GET requests to test the endpoint
 export async function GET() {
-  return NextResponse.json({ status: 'PayFast webhook endpoint active' })
+  return NextResponse.json({ status: 'PayFast webhook endpoint active' } as any)
 }
+
+
+
+
+
+
